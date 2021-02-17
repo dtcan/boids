@@ -83,11 +83,18 @@ function update(delta) {
         });
         toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position);
         matchVelocity.divideScalar(matchTotal + epsilon);
+
+        let noise = new THREE.Vector3(
+            Math.random() - 0.5,
+            Math.random() - 0.5,
+            Math.random() - 0.5
+        ).normalize();
             
         let target = new THREE.Vector3()
             .addScaledVector(toCenter, 1.0)
             .addScaledVector(awayFromOthers, 1.0)
-            .addScaledVector(matchVelocity, 1.0);
+            .addScaledVector(matchVelocity, 1.0)
+            .addScaledVector(noise, 0.5);
 
         // Apply changes to model
         boid.velocity.lerp(target, delta * boid.maneuver);
