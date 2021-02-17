@@ -1,13 +1,4 @@
-const boids = new Tree(
-    (boid1, boid2, dim) => {
-        let p1 = boid1.body.position;
-        let p2 = boid2.body.position;
-        let vals1 = [p1.x, p1.y, p1.z];
-        let vals2 = [p2.x, p2.y, p2.z];
-        return vals1[dim] < vals2[dim];
-    },
-    (boid1, boid2) => boid1.body.position.distanceTo(boid2.body.position)
-);
+const boids = [];
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -44,7 +35,7 @@ function addBoids(n) {
         boid.body.position.x = (Math.random() * 100.0) - 50.0;
         boid.body.position.y = (Math.random() * 100.0) - 50.0;
         boid.body.position.z = (Math.random() * 100.0) - 50.0;
-        boids.insert(boid);
+        boids.push(boid);
         scene.add(boid.body);
     }
 }
@@ -52,8 +43,22 @@ function addBoids(n) {
 function update(delta) {
     delta = Math.min(delta, 0.1);
 
-    boids.forEach((boid, i) => {
-        let seenBoids = boids.inRange(boid, boid.sightRange);
+    // Build tree
+    let boidsTree = new Tree(
+        (boid1, boid2, dim) => {
+            let p1 = boid1.body.position;
+            let p2 = boid2.body.position;
+            let vals1 = [p1.x, p1.y, p1.z];
+            let vals2 = [p2.x, p2.y, p2.z];
+            return vals1[dim] < vals2[dim];
+        },
+        (boid1, boid2) => boid1.body.position.distanceTo(boid2.body.position)
+    );
+    boids.forEach(boid => boidsTree.insert(boid));
+
+    // Update boids
+    boidsTree.forEach(boid => {
+        let seenBoids = boidsTree.inRange(boid, boid.sightRange);
         let toCenter = seenBoids
             .reduce((avg, other) => avg.add(other.body.position), new THREE.Vector3())
             .multiplyScalar(1 / seenBoids.length)
