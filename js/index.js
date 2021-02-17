@@ -97,8 +97,10 @@ function update(delta) {
         matchVelocity.divideScalar(matchTotal + epsilon).normalize();
 
         let stayClose = new THREE.Vector3();
-        if(boid.body.position.length() > 50.0) {
-            stayClose.sub(boid.body.position).normalize();
+        let dist = boid.body.position.length();
+        if(dist > 50.0) {
+            stayClose.sub(boid.body.position).normalize()
+                .multiplyScalar(Math.min((dist - 50.0) / 10.0, 1.0));
         }
         
         let target = new THREE.Vector3()
