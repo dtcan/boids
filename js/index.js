@@ -26,7 +26,15 @@ window.addEventListener("resize", () => {
 });
 
 const geom = new THREE.ConeBufferGeometry(0.3,1.0,24);
-const mat = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+const mat = [
+    new THREE.MeshLambertMaterial({ color: 0xff9999 }),
+    new THREE.MeshLambertMaterial({ color: 0xffce99 }),
+    new THREE.MeshLambertMaterial({ color: 0xffff99 }),
+    new THREE.MeshLambertMaterial({ color: 0xb4ff99 }),
+    new THREE.MeshLambertMaterial({ color: 0x99ffe2 }),
+    new THREE.MeshLambertMaterial({ color: 0x99dbff }),
+    new THREE.MeshLambertMaterial({ color: 0xff99ec })
+];
 
 function addLights() {
     const ambient = new THREE.AmbientLight(0xffffff, 0.6);
@@ -46,7 +54,7 @@ function resetBoids() {
     }
     for(let i = 0; i < params.scale.spawn.count; i++) {
         let boid = {
-            body: new THREE.Mesh(geom, mat),
+            body: new THREE.Mesh(geom, mat[Math.floor(Math.random() * mat.length)]),
             velocity: new THREE.Vector3(),
             maneuverPercent: Math.random(),
             speedPercent: Math.random(),
