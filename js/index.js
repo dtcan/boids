@@ -39,7 +39,11 @@ function addLights() {
     scene.add(direct.target);
 }
 
-function addBoids() {
+function resetBoids() {
+    while(boids.length > 0) {
+        let boid = boids.pop();
+        scene.remove(boid.body);
+    }
     for(let i = 0; i < params.scale.spawn.count; i++) {
         let boid = {
             body: new THREE.Mesh(geom, mat),
@@ -142,5 +146,5 @@ function tick(prevTick) {
 
 
 addLights();
-addBoids();
+resetBoids();
 tick(new Date());
