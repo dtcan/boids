@@ -92,8 +92,9 @@ function update(delta) {
                 matchTotal++;
             }
         });
-        toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position);
-        matchVelocity.divideScalar(matchTotal + epsilon);
+        toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position).normalize();
+        awayFromOthers.normalize();
+        matchVelocity.divideScalar(matchTotal + epsilon).normalize();
 
         let stayClose = new THREE.Vector3();
         if(boid.body.position.length() > 50.0) {
