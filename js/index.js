@@ -30,7 +30,8 @@ function addBoids(n) {
             maneuver: 1.0,
             maxSpeed: 3.0,
             sightRange: 18.0,
-            avoidRange: 5.0
+            avoidRange: 5.0,
+            matchRange: 5.0
         };
         boid.body.position.x = (Math.random() * 100.0) - 50.0;
         boid.body.position.y = (Math.random() * 100.0) - 50.0;
@@ -62,6 +63,8 @@ function update(delta) {
         let seenBoids = boidsTree.inRange(boid, boid.sightRange);
         let toCenter = new THREE.Vector3();
         let awayFromOthers = new THREE.Vector3();
+        let matchVelocity = new THREE.Vector3();
+        let matchTotal = 0;
         seenBoids.forEach(other => {
             toCenter.add(other.body.position);
             let d = boid.body.position.distanceTo(other.body.position);
@@ -73,12 +76,18 @@ function update(delta) {
                     .multiplyScalar(Math.exp(-d));
                 awayFromOthers.add(pushVec);
             }
+            if(d < boid.matchRange) {
+                matchVelocity.add(other.velocity);
+                matchTotal++;
+            }
         });
         toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position);
+        matchVelocity.divideScalar(matchTotal + epsilon);
             
         let target = new THREE.Vector3()
             .addScaledVector(toCenter, 1.0)
-            .addScaledVector(awayFromOthers, 1.0);
+            .addScaledVector(awayFromOthers, 1.0)
+            .addScaledVector(matchVelocity, 1.0);
 
         // Apply changes to model
         boid.velocity.lerp(target, delta * boid.maneuver);
