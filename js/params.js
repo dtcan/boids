@@ -19,7 +19,8 @@ const params = {
             range: 100
         },
         roamDistance: 50.0,
-        cameraDistance: 80
+        cameraDistance: 80,
+        sightLimit: 150
     }
 }
 

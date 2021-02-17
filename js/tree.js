@@ -28,13 +28,54 @@ class Tree {
             let less = this.lessThan(x, this.x, dim);
             let dist = this.getDist(this.x, x);
             if(dist <= range) {
-                let elems = [[this.x, dist]];
+                let elems = [];
                 if(this.left) {
-                    Array.prototype.push.apply(elems, this.left.inRange(x, range, (dim+1) % 3));
+                    elems = this.left.inRange(x, range, (dim+1) % 3);
                 }
                 if(this.right) {
-                    Array.prototype.push.apply(elems, this.right.inRange(x, range, (dim+1) % 3));
+                    let rightElems = this.right.inRange(x, range, (dim+1) % 3);
+                    if(elems.length > 0) {
+                        // Merge lists
+                        let newElems = [];
+                        let i = 0;
+                        let j = 0;
+                        while(i < elems.length && j < rightElems.length) {
+                            if(elems[i][1] < rightElems[j][1]) {
+                                newElems.push(elems[i]);
+                                i++;
+                            }else {
+                                newElems.push(rightElems[j]);
+                                j++;
+                            }
+                        }
+                        while(i < elems.length) {
+                            newElems.push(elems[i]);
+                            i++;
+                        }
+                        while(j < rightElems.length) {
+                            newElems.push(rightElems[j]);
+                            j++;
+                        }
+                        elems = newElems;
+                    }else {
+                        elems = rightElems;
+                    }
                 }
+
+                // Insert this node
+                let a = 0;
+                let b = elems.length;
+                while(a < b) {
+                    let m = Math.floor((a + b) / 2);
+                    if(elems[m][1] == dist) {
+                        break;
+                    }else if(elems[m][1] < dist) {
+                        a = m + 1;
+                    }else {
+                        b = m;
+                    }
+                }
+                elems.splice(a, 0, [this.x, dist]);
                 return elems;
             }else if(this.left && less) {
                 return this.left.inRange(x, range, (dim+1) % 3);

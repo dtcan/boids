@@ -60,9 +60,9 @@ function getTargetVelocity(boid, boidsTree) {
     let awayFromOthers = new THREE.Vector3();
     let matchVelocity = new THREE.Vector3();
     let matchTotal = 0;
-    seenBoids.forEach(otherPair => {
-        let other = otherPair[0];
-        let d = otherPair[1];
+    for(let i = 0; i < Math.min(seenBoids.length, params.scale.sightLimit); i++) {
+        let other = seenBoids[i][0];
+        let d = seenBoids[i][1];
         toCenter.add(other.body.position);
         if(d < getValueByPercent(params.ability.avoidRange, boid.avoidRangePercent)) {
             let pushVec = new THREE.Vector3()
@@ -76,7 +76,7 @@ function getTargetVelocity(boid, boidsTree) {
             matchVelocity.add(other.velocity);
             matchTotal++;
         }
-    });
+    }
     toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position).normalize();
     awayFromOthers.normalize();
     matchVelocity.divideScalar(matchTotal + epsilon).normalize();
