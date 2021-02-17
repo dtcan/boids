@@ -40,9 +40,9 @@ function addBoids(n) {
             body: new THREE.Mesh(geom, mat),
             velocity: new THREE.Vector3(),
             maneuver: randomRange(0.4, 1.0),
-            maxSpeed: randomRange(5.0, 15.0),
+            maxSpeed: randomRange(15.0, 30.0),
             sightRange: randomRange(10.0, 15.0),
-            avoidRange: 5.0,
+            avoidRange: 4.0,
             matchRange: 5.0
         };
         boid.body.position.copy(randomDirection()).multiplyScalar(Math.random() * 100.0);
@@ -105,10 +105,10 @@ function update(delta) {
         
         let target = new THREE.Vector3()
             .addScaledVector(stayClose, 0.5)
-            .addScaledVector(toCenter, 0.10)
-            .addScaledVector(awayFromOthers, 0.10)
+            .addScaledVector(toCenter, 0.12)
+            .addScaledVector(awayFromOthers, 0.14)
             .addScaledVector(matchVelocity, 0.10)
-            .addScaledVector(randomDirection(), 0.20)
+            .addScaledVector(randomDirection(), 0.14)
             .normalize().multiplyScalar(boid.maxSpeed);
 
         // Apply changes to model
