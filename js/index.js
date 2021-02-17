@@ -52,9 +52,53 @@ function addBoids() {
     }
 }
 
+function getTargetVelocity(boid, boidsTree) {
+    const epsilon = 1e-3;
+    
+    let seenBoids = boidsTree.inRange(boid, getValueByPercent(params.ability.sightRange, boid.sightRangePercent));
+    let toCenter = new THREE.Vector3();
+    let awayFromOthers = new THREE.Vector3();
+    let matchVelocity = new THREE.Vector3();
+    let matchTotal = 0;
+    seenBoids.forEach(otherPair => {
+        let other = otherPair[0];
+        let d = otherPair[1];
+        toCenter.add(other.body.position);
+        if(d < getValueByPercent(params.ability.avoidRange, boid.avoidRangePercent)) {
+            let pushVec = new THREE.Vector3()
+                .add(boid.body.position)
+                .sub(other.body.position)
+                .normalize()
+                .multiplyScalar(Math.exp(-d));
+            awayFromOthers.add(pushVec);
+        }
+        if(d < getValueByPercent(params.ability.matchRange, boid.matchRangePercent)) {
+            matchVelocity.add(other.velocity);
+            matchTotal++;
+        }
+    });
+    toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position).normalize();
+    awayFromOthers.normalize();
+    matchVelocity.divideScalar(matchTotal + epsilon).normalize();
+
+    let stayClose = new THREE.Vector3();
+    let dist = boid.body.position.length();
+    if(dist > params.scale.roamDistance) {
+        stayClose.sub(boid.body.position).normalize()
+            .multiplyScalar(Math.min((dist - params.scale.roamDistance) / 10.0, 1.0));
+    }
+    
+    return new THREE.Vector3()
+        .addScaledVector(stayClose, 0.5)
+        .addScaledVector(toCenter, 0.12)
+        .addScaledVector(awayFromOthers, 0.14)
+        .addScaledVector(matchVelocity, 0.10)
+        .addScaledVector(randomDirection(), 0.14)
+        .normalize().multiplyScalar(getValueByPercent(params.ability.speed, boid.speedPercent));
+}
+
 function update(delta) {
     delta = Math.min(delta, 0.1);
-    const epsilon = 1e-3;
 
     // Build tree
     let boidsTree = new Tree(
@@ -71,48 +115,7 @@ function update(delta) {
 
     // Update boids
     boidsTree.forEach(boid => {
-        let seenBoids = boidsTree.inRange(boid, getValueByPercent(params.ability.sightRange, boid.sightRangePercent));
-        let toCenter = new THREE.Vector3();
-        let awayFromOthers = new THREE.Vector3();
-        let matchVelocity = new THREE.Vector3();
-        let matchTotal = 0;
-        seenBoids.forEach(otherPair => {
-            let other = otherPair[0];
-            let d = otherPair[1];
-            toCenter.add(other.body.position);
-            if(d < getValueByPercent(params.ability.avoidRange, boid.avoidRangePercent)) {
-                let pushVec = new THREE.Vector3()
-                    .add(boid.body.position)
-                    .sub(other.body.position)
-                    .normalize()
-                    .multiplyScalar(Math.exp(-d));
-                awayFromOthers.add(pushVec);
-            }
-            if(d < getValueByPercent(params.ability.matchRange, boid.matchRangePercent)) {
-                matchVelocity.add(other.velocity);
-                matchTotal++;
-            }
-        });
-        toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position).normalize();
-        awayFromOthers.normalize();
-        matchVelocity.divideScalar(matchTotal + epsilon).normalize();
-
-        let stayClose = new THREE.Vector3();
-        let dist = boid.body.position.length();
-        if(dist > params.scale.roamDistance) {
-            stayClose.sub(boid.body.position).normalize()
-                .multiplyScalar(Math.min((dist - params.scale.roamDistance) / 10.0, 1.0));
-        }
-        
-        let target = new THREE.Vector3()
-            .addScaledVector(stayClose, 0.5)
-            .addScaledVector(toCenter, 0.12)
-            .addScaledVector(awayFromOthers, 0.14)
-            .addScaledVector(matchVelocity, 0.10)
-            .addScaledVector(randomDirection(), 0.14)
-            .normalize().multiplyScalar(getValueByPercent(params.ability.speed, boid.speedPercent));
-
-        // Apply changes to model
+        let target = getTargetVelocity(boid, boidsTree);
         boid.velocity.lerp(target, delta * getValueByPercent(params.ability.maneuver, boid.maneuverPercent));
         boid.body.rotation.setFromQuaternion(
             new THREE.Quaternion().setFromAxisAngle(
