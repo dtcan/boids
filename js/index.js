@@ -20,6 +20,9 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+const geom = new THREE.ConeGeometry(0.3,1.0,24);
+const mat = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+
 function addLights() {
     const ambient = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambient);
@@ -34,10 +37,7 @@ function addLights() {
 function addBoids(n) {
     for(let i = 0; i < n; i++) {
         let boid = {
-            body: new THREE.Mesh(
-                new THREE.ConeGeometry(0.3,1.0,24),
-                new THREE.MeshPhongMaterial( { color: 0x00ff00 } )
-            ),
+            body: new THREE.Mesh(geom, mat),
             velocity: new THREE.Vector3(),
             maneuver: randomRange(0.4, 1.0),
             maxSpeed: randomRange(5.0, 15.0),
