@@ -6,15 +6,15 @@ function randomDirection() {
     ).normalize();
 }
 
-function randomRange(min, max) {
-    return (Math.random() * (max - min)) + min;
+function getValueByPercent(range, percent) {
+    return (percent * (range.max - range.min)) + range.min;
 }
 
 const boids = [];
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 80;
+camera.position.z = params.scale.cameraDistance;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -34,19 +34,19 @@ function addLights() {
     scene.add(direct.target);
 }
 
-function addBoids(n) {
-    for(let i = 0; i < n; i++) {
+function addBoids() {
+    for(let i = 0; i < params.spawn.count; i++) {
         let boid = {
             body: new THREE.Mesh(geom, mat),
             velocity: new THREE.Vector3(),
-            maneuver: randomRange(0.4, 1.0),
-            maxSpeed: randomRange(15.0, 30.0),
-            sightRange: randomRange(10.0, 15.0),
-            avoidRange: 4.0,
-            matchRange: 5.0
+            maneuverPercent: Math.random(),
+            speedPercent: Math.random(),
+            sightRangePercent: Math.random(),
+            avoidRangePercent: Math.random(),
+            matchRangePercent: Math.random()
         };
-        boid.body.position.copy(randomDirection()).multiplyScalar(Math.random() * 100.0);
-        boid.velocity.copy(randomDirection()).multiplyScalar(boid.maxSpeed);
+        boid.body.position.copy(randomDirection()).multiplyScalar(Math.random() * params.spawn.range);
+        boid.velocity.copy(randomDirection()).multiplyScalar(getValueByPercent(params.ability.speed, boid.speedPercent));
         boids.push(boid);
         scene.add(boid.body);
     }
@@ -71,7 +71,7 @@ function update(delta) {
 
     // Update boids
     boidsTree.forEach(boid => {
-        let seenBoids = boidsTree.inRange(boid, boid.sightRange);
+        let seenBoids = boidsTree.inRange(boid, getValueByPercent(params.ability.sightRange, boid.sightRangePercent));
         let toCenter = new THREE.Vector3();
         let awayFromOthers = new THREE.Vector3();
         let matchVelocity = new THREE.Vector3();
@@ -80,7 +80,7 @@ function update(delta) {
             let other = otherPair[0];
             let d = otherPair[1];
             toCenter.add(other.body.position);
-            if(d < boid.avoidRange) {
+            if(d < getValueByPercent(params.ability.avoidRange, boid.avoidRangePercent)) {
                 let pushVec = new THREE.Vector3()
                     .add(boid.body.position)
                     .sub(other.body.position)
@@ -88,7 +88,7 @@ function update(delta) {
                     .multiplyScalar(Math.exp(-d));
                 awayFromOthers.add(pushVec);
             }
-            if(d < boid.matchRange) {
+            if(d < getValueByPercent(params.ability.matchRange, boid.matchRangePercent)) {
                 matchVelocity.add(other.velocity);
                 matchTotal++;
             }
@@ -99,9 +99,9 @@ function update(delta) {
 
         let stayClose = new THREE.Vector3();
         let dist = boid.body.position.length();
-        if(dist > 50.0) {
+        if(dist > params.scale.roamDistance) {
             stayClose.sub(boid.body.position).normalize()
-                .multiplyScalar(Math.min((dist - 50.0) / 10.0, 1.0));
+                .multiplyScalar(Math.min((dist - params.scale.roamDistance) / 10.0, 1.0));
         }
         
         let target = new THREE.Vector3()
@@ -110,20 +110,16 @@ function update(delta) {
             .addScaledVector(awayFromOthers, 0.14)
             .addScaledVector(matchVelocity, 0.10)
             .addScaledVector(randomDirection(), 0.14)
-            .normalize().multiplyScalar(boid.maxSpeed);
+            .normalize().multiplyScalar(getValueByPercent(params.ability.speed, boid.speedPercent));
 
         // Apply changes to model
-        boid.velocity.lerp(target, delta * boid.maneuver);
+        boid.velocity.lerp(target, delta * getValueByPercent(params.ability.maneuver, boid.maneuverPercent));
         boid.body.rotation.setFromQuaternion(
             new THREE.Quaternion().setFromAxisAngle(
                 new THREE.Vector3(0.0,1.0,0.0).cross(boid.velocity).normalize(),
                 new THREE.Vector3(0.0,1.0,0.0).angleTo(boid.velocity)
             )
         );
-        let speed = boid.velocity.length();
-        if(speed > boid.maxSpeed) {
-            boid.velocity.multiplyScalar(boid.maxSpeed / speed);
-        }
         boid.body.position.addScaledVector(boid.velocity, delta);
     });
 }
@@ -132,10 +128,11 @@ function tick(prevTick) {
     let currTick = new Date();
 	requestAnimationFrame(() => tick(currTick));
     update((currTick - prevTick) / 1000);
+    camera.position.z = params.scale.cameraDistance;
 	renderer.render(scene, camera);
 }
 
 
 addLights();
-addBoids(1200);
+addBoids();
 tick(new Date());
