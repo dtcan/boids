@@ -97,10 +97,10 @@ function update(delta) {
             
         let target = new THREE.Vector3()
             .addScaledVector(stayClose, 0.5)
-            .addScaledVector(toCenter, 0.15)
-            .addScaledVector(awayFromOthers, 0.15)
-            .addScaledVector(matchVelocity, 0.1)
-            .addScaledVector(noise, 0.1)
+            .addScaledVector(toCenter, 0.14)
+            .addScaledVector(awayFromOthers, 0.14)
+            .addScaledVector(matchVelocity, 0.14)
+            .addScaledVector(noise, 0.08)
             .normalize().multiplyScalar(boid.maxSpeed);
 
         // Apply changes to model
