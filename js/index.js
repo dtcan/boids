@@ -1,4 +1,13 @@
-const boids = [];
+const boids = new Tree(
+    (boid1, boid2, dim) => {
+        let p1 = boid1.body.position;
+        let p2 = boid2.body.position;
+        let vals1 = [p1.x, p1.y, p1.z];
+        let vals2 = [p2.x, p2.y, p2.z];
+        return vals1[dim] < vals2[dim];
+    },
+    (boid1, boid2) => boid1.body.position.distanceTo(boid2.body.position)
+);
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -27,21 +36,31 @@ function addBoids(n) {
                 new THREE.MeshPhongMaterial( { color: 0x00ff00 } )
             ),
             velocity: new THREE.Vector3(),
-            maneuver: 1.0
+            maneuver: 1.0,
+            maxSpeed: 3.0,
+            sightRange: 18.0,
+            avoidRange: 5.0
         };
         boid.body.position.x = (Math.random() * 100.0) - 50.0;
         boid.body.position.y = (Math.random() * 100.0) - 50.0;
         boid.body.position.z = (Math.random() * 100.0) - 50.0;
-        boids.push(boid);
+        boids.insert(boid);
         scene.add(boid.body);
     }
 }
 
 function update(delta) {
     delta = Math.min(delta, 0.1);
+
     boids.forEach((boid, i) => {
-        // TODO: Use boid algorithm to get target velocity
-        let target = new THREE.Vector3();
+        let seenBoids = boids.inRange(boid, boid.sightRange);
+        let toCenter = seenBoids
+            .reduce((avg, other) => avg.add(other.body.position), new THREE.Vector3())
+            .multiplyScalar(1 / seenBoids.length)
+            .sub(boid.body.position);
+            
+        let target = new THREE.Vector3()
+            .addScaledVector(toCenter, 1.0);
 
         // Apply changes to model
         boid.velocity.lerp(target, delta * boid.maneuver);
@@ -51,6 +70,10 @@ function update(delta) {
                 new THREE.Vector3(0.0,1.0,0.0).angleTo(boid.velocity)
             )
         );
+        let speed = boid.velocity.length();
+        if(speed > boid.maxSpeed) {
+            boid.velocity.multiplyScalar(boid.maxSpeed / speed);
+        }
         boid.body.position.addScaledVector(boid.velocity, delta);
     });
 }
