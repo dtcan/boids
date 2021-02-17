@@ -99,19 +99,13 @@ function update(delta) {
         if(boid.body.position.length() > 50.0) {
             stayClose.sub(boid.body.position).normalize();
         }
-
-        let noise = new THREE.Vector3(
-            Math.random() - 0.5,
-            Math.random() - 0.5,
-            Math.random() - 0.5
-        ).normalize();
-            
+        
         let target = new THREE.Vector3()
             .addScaledVector(stayClose, 0.5)
-            .addScaledVector(toCenter, 0.12)
-            .addScaledVector(awayFromOthers, 0.12)
-            .addScaledVector(matchVelocity, 0.12)
-            .addScaledVector(noise, 0.14)
+            .addScaledVector(toCenter, 0.10)
+            .addScaledVector(awayFromOthers, 0.10)
+            .addScaledVector(matchVelocity, 0.10)
+            .addScaledVector(randomDirection(), 0.20)
             .normalize().multiplyScalar(boid.maxSpeed);
 
         // Apply changes to model
