@@ -20,8 +20,8 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-const geom = new THREE.ConeGeometry(0.3,1.0,24);
-const mat = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+const geom = new THREE.ConeBufferGeometry(0.3,1.0,24);
+const mat = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
 
 function addLights() {
     const ambient = new THREE.AmbientLight(0xffffff, 0.6);
