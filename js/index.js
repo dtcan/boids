@@ -27,8 +27,8 @@ function addBoids(n) {
                 new THREE.MeshPhongMaterial( { color: 0x00ff00 } )
             ),
             velocity: new THREE.Vector3(),
-            maneuver: 0.2,
-            maxSpeed: 30.0,
+            maneuver: 1.0,
+            maxSpeed: 15.0,
             sightRange: 15.0,
             avoidRange: 5.0,
             matchRange: 5.0
@@ -84,6 +84,11 @@ function update(delta) {
         toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position);
         matchVelocity.divideScalar(matchTotal + epsilon);
 
+        let stayClose = new THREE.Vector3();
+        if(boid.body.position.length() > 50.0) {
+            stayClose.sub(boid.body.position).normalize();
+        }
+
         let noise = new THREE.Vector3(
             Math.random() - 0.5,
             Math.random() - 0.5,
@@ -91,10 +96,12 @@ function update(delta) {
         ).normalize();
             
         let target = new THREE.Vector3()
-            .addScaledVector(toCenter, 1.0)
-            .addScaledVector(awayFromOthers, 1.0)
-            .addScaledVector(matchVelocity, 1.0)
-            .addScaledVector(noise, 0.5);
+            .addScaledVector(stayClose, 0.5)
+            .addScaledVector(toCenter, 0.15)
+            .addScaledVector(awayFromOthers, 0.15)
+            .addScaledVector(matchVelocity, 0.1)
+            .addScaledVector(noise, 0.1)
+            .normalize().multiplyScalar(boid.maxSpeed);
 
         // Apply changes to model
         boid.velocity.lerp(target, delta * boid.maneuver);
