@@ -1,3 +1,15 @@
+function randomDirection() {
+    return new THREE.Vector3(
+        Math.random() - 0.5,
+        Math.random() - 0.5,
+        Math.random() - 0.5
+    ).normalize();
+}
+
+function randomRange(min, max) {
+    return (Math.random() * (max - min)) + min;
+}
+
 const boids = [];
 
 const scene = new THREE.Scene();
@@ -27,15 +39,14 @@ function addBoids(n) {
                 new THREE.MeshPhongMaterial( { color: 0x00ff00 } )
             ),
             velocity: new THREE.Vector3(),
-            maneuver: 1.0,
-            maxSpeed: 15.0,
-            sightRange: 15.0,
+            maneuver: randomRange(0.4, 1.0),
+            maxSpeed: randomRange(5.0, 15.0),
+            sightRange: randomRange(10.0, 15.0),
             avoidRange: 5.0,
             matchRange: 5.0
         };
-        boid.body.position.x = (Math.random() * 100.0) - 50.0;
-        boid.body.position.y = (Math.random() * 100.0) - 50.0;
-        boid.body.position.z = (Math.random() * 100.0) - 50.0;
+        boid.body.position.copy(randomDirection()).multiplyScalar(Math.random() * 100.0);
+        boid.velocity.copy(randomDirection()).multiplyScalar(boid.maxSpeed);
         boids.push(boid);
         scene.add(boid.body);
     }
@@ -97,10 +108,10 @@ function update(delta) {
             
         let target = new THREE.Vector3()
             .addScaledVector(stayClose, 0.5)
-            .addScaledVector(toCenter, 0.14)
-            .addScaledVector(awayFromOthers, 0.14)
-            .addScaledVector(matchVelocity, 0.14)
-            .addScaledVector(noise, 0.08)
+            .addScaledVector(toCenter, 0.12)
+            .addScaledVector(awayFromOthers, 0.12)
+            .addScaledVector(matchVelocity, 0.12)
+            .addScaledVector(noise, 0.14)
             .normalize().multiplyScalar(boid.maxSpeed);
 
         // Apply changes to model
@@ -128,5 +139,5 @@ function tick(prevTick) {
 
 
 addLights();
-addBoids(1000);
+addBoids(1200);
 tick(new Date());
