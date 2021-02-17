@@ -27,9 +27,9 @@ function addBoids(n) {
                 new THREE.MeshPhongMaterial( { color: 0x00ff00 } )
             ),
             velocity: new THREE.Vector3(),
-            maneuver: 1.0,
-            maxSpeed: 3.0,
-            sightRange: 18.0,
+            maneuver: 0.2,
+            maxSpeed: 30.0,
+            sightRange: 15.0,
             avoidRange: 5.0,
             matchRange: 5.0
         };
