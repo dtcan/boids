@@ -42,6 +42,7 @@ function addBoids(n) {
 
 function update(delta) {
     delta = Math.min(delta, 0.1);
+    const epsilon = 1e-3;
 
     // Build tree
     let boidsTree = new Tree(
@@ -59,13 +60,25 @@ function update(delta) {
     // Update boids
     boidsTree.forEach(boid => {
         let seenBoids = boidsTree.inRange(boid, boid.sightRange);
-        let toCenter = seenBoids
-            .reduce((avg, other) => avg.add(other.body.position), new THREE.Vector3())
-            .multiplyScalar(1 / seenBoids.length)
-            .sub(boid.body.position);
+        let toCenter = new THREE.Vector3();
+        let awayFromOthers = new THREE.Vector3();
+        seenBoids.forEach(other => {
+            toCenter.add(other.body.position);
+            let d = boid.body.position.distanceTo(other.body.position);
+            if(d < boid.avoidRange) {
+                let pushVec = new THREE.Vector3()
+                    .add(boid.body.position)
+                    .sub(other.body.position)
+                    .normalize()
+                    .multiplyScalar(Math.exp(-d));
+                awayFromOthers.add(pushVec);
+            }
+        });
+        toCenter.divideScalar(seenBoids.length + epsilon).sub(boid.body.position);
             
         let target = new THREE.Vector3()
-            .addScaledVector(toCenter, 1.0);
+            .addScaledVector(toCenter, 1.0)
+            .addScaledVector(awayFromOthers, 1.0);
 
         // Apply changes to model
         boid.velocity.lerp(target, delta * boid.maneuver);
