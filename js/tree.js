@@ -24,24 +24,25 @@ class Tree {
     }
 
     inRange(x, range, dim=0) {
-        let elems = [];
         if(this.x != null) {
             let less = this.lessThan(x, this.x, dim);
-            if(this.getDist(this.x, x) <= range) {
-                elems.push(this.x);
+            let dist = this.getDist(this.x, x);
+            if(dist <= range) {
+                let elems = [[this.x, dist]];
                 if(this.left) {
                     Array.prototype.push.apply(elems, this.left.inRange(x, range, (dim+1) % 3));
                 }
                 if(this.right) {
                     Array.prototype.push.apply(elems, this.right.inRange(x, range, (dim+1) % 3));
                 }
+                return elems;
             }else if(this.left && less) {
-                Array.prototype.push.apply(elems, this.left.inRange(x, range, (dim+1) % 3));
+                return this.left.inRange(x, range, (dim+1) % 3);
             }else if(this.right && !less) {
-                Array.prototype.push.apply(elems, this.right.inRange(x, range, (dim+1) % 3));
+                return this.right.inRange(x, range, (dim+1) % 3);
             }
         }
-        return elems;
+        return [];
     }
 
     forEach(func) {

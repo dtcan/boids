@@ -76,9 +76,10 @@ function update(delta) {
         let awayFromOthers = new THREE.Vector3();
         let matchVelocity = new THREE.Vector3();
         let matchTotal = 0;
-        seenBoids.forEach(other => {
+        seenBoids.forEach(otherPair => {
+            let other = otherPair[0];
+            let d = otherPair[1];
             toCenter.add(other.body.position);
-            let d = boid.body.position.distanceTo(other.body.position);
             if(d < boid.avoidRange) {
                 let pushVec = new THREE.Vector3()
                     .add(boid.body.position)
