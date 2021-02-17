@@ -19,6 +19,11 @@ camera.position.z = params.scale.cameraDistance;
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 const geom = new THREE.ConeBufferGeometry(0.3,1.0,24);
 const mat = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
