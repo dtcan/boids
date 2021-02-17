@@ -35,7 +35,7 @@ function addLights() {
 }
 
 function addBoids() {
-    for(let i = 0; i < params.spawn.count; i++) {
+    for(let i = 0; i < params.scale.spawn.count; i++) {
         let boid = {
             body: new THREE.Mesh(geom, mat),
             velocity: new THREE.Vector3(),
@@ -45,7 +45,7 @@ function addBoids() {
             avoidRangePercent: Math.random(),
             matchRangePercent: Math.random()
         };
-        boid.body.position.copy(randomDirection()).multiplyScalar(Math.random() * params.spawn.range);
+        boid.body.position.copy(randomDirection()).multiplyScalar(Math.random() * params.scale.spawn.range);
         boid.velocity.copy(randomDirection()).multiplyScalar(getValueByPercent(params.ability.speed, boid.speedPercent));
         boids.push(boid);
         scene.add(boid.body);

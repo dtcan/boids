@@ -1,8 +1,4 @@
 const params = {
-    spawn: {
-        count: 1200,
-        range: 100
-    },
     ability: {
         maneuver: { min: 0.4, max: 1.0 },
         speed: { min: 15.0, max: 30.0 },
@@ -18,7 +14,12 @@ const params = {
         noise: 0.14
     },
     scale: {
+        spawn: {
+            count: 1200,
+            range: 100
+        },
         roamDistance: 50.0,
         cameraDistance: 80
     }
 }
+
